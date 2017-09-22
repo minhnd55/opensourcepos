@@ -1,5 +1,9 @@
 <?php $this->load->view("partial/header"); ?>
 
+<script type="text/javascript">
+	dialog_support.init("a.modal-dlg");
+</script>
+
 <?php
 if(isset($error))
 {
@@ -73,8 +77,8 @@ if(isset($error))
 				</div>
 				<div class="list-group">
 				<?php 
-					show_report('', 'reports_inventory_low');
-					show_report('', 'reports_inventory_summary');
+				show_report('', 'reports_inventory_low');
+				show_report('', 'reports_inventory_summary');
 				?>
 				</div>
 			</div>

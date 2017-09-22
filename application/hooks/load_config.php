@@ -1,5 +1,8 @@
-<?php
-//Loads configuration from database into global CI config
+<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+
+/**
+ * Loads configuration from database into global CI config
+ */
 function load_config()
 {
     $CI =& get_instance();
@@ -16,11 +19,11 @@ function load_config()
         if (!file_exists('../application/language/' . current_language_code()))
         {
             $CI->config->set_item('language', 'english');
-            $CI->config->set_item('language_code', 'en');
+            $CI->config->set_item('language_code', 'en-US');
         }
 
-        load_language_files('../vendor/codeigniter/framework/system/language', current_language());
-        load_language_files('../application/language', current_language_code());
+        _load_language_files($CI, '../vendor/codeigniter/framework/system/language', current_language());
+        _load_language_files($CI, '../application/language', current_language_code());
     }
     
     //Set timezone from config database
@@ -33,17 +36,16 @@ function load_config()
         date_default_timezone_set('America/New_York');
     }
 
-    bcscale(max(2, $CI->config->item('currency_decimals') + $CI->config->item('tax_decimals')));
+    bcscale(max(2, totals_decimals() + tax_decimals()));
 }
 
 /**
- * @param $language
  * @param $CI
+ * @param $path
+ * @param $language
  */
-function load_language_files($path, $language)
+function _load_language_files($CI, $path, $language)
 {
-    $CI =& get_instance();
-
     $map = directory_map($path . DIRECTORY_SEPARATOR . $language);
 
     foreach($map as $file)

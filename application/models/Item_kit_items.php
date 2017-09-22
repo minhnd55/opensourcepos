@@ -1,4 +1,9 @@
-<?php
+<?php if (!defined('BASEPATH')) exit('No direct script access allowed');
+
+/**
+ * Item_kit_items class
+ */
+
 class Item_kit_items extends CI_Model
 {
 	/*
@@ -55,13 +60,13 @@ class Item_kit_items extends CI_Model
 
 		return $success;
 	}
-	
+
 	/*
 	Deletes item kit items given an item kit
 	*/
 	public function delete($item_kit_id)
 	{
-		return $this->db->delete('item_kit_items', array('item_kit_id' => $item_kit_id)); 
+		return $this->db->delete('item_kit_items', array('item_kit_id' => $item_kit_id));
 	}
 }
 ?>

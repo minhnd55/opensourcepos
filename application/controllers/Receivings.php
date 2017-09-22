@@ -27,6 +27,16 @@ class Receivings extends Secure_Controller
 		echo json_encode($suggestions);
 	}
 
+	public function stock_item_search()
+	{
+		$suggestions = $this->Item->get_stock_search_suggestions($this->input->get('term'), array('search_custom' => FALSE, 'is_deleted' => FALSE), TRUE);
+		$suggestions = array_merge($suggestions, $this->Item_kit->get_search_suggestions($this->input->get('term')));
+
+		$suggestions = $this->xss_clean($suggestions);
+
+		echo json_encode($suggestions);
+	}
+
 	public function select_supplier()
 	{
 		$supplier_id = $this->input->post('supplier');
@@ -80,7 +90,8 @@ class Receivings extends Secure_Controller
 
 		$mode = $this->receiving_lib->get_mode();
 		$item_id_or_number_or_item_kit_or_receipt = $this->input->post('item');
-		$quantity = ($mode == 'receive' || $mode == 'requisition') ? 1 : -1;
+		$this->barcode_lib->parse_barcode_fields($quantity, $item_id_or_number_or_item_kit_or_receipt);
+		$quantity = ($mode == 'receive' || $mode == 'requisition') ? $quantity : -$quantity;
 		$item_location = $this->receiving_lib->get_stock_source();
 
 		if($mode == 'return' && $this->Receiving->is_valid_receipt($item_id_or_number_or_item_kit_or_receipt))
@@ -187,7 +198,6 @@ class Receivings extends Secure_Controller
 		
 		$data['cart'] = $this->receiving_lib->get_cart();
 		$data['total'] = $this->receiving_lib->get_total();
-		$data['receipt_title'] = $this->lang->line('receivings_receipt');
 		$data['transaction_time'] = date($this->config->item('dateformat') . ' ' . $this->config->item('timeformat'));
 		$data['mode'] = $this->receiving_lib->get_mode();
 		$data['comment'] = $this->receiving_lib->get_comment();
@@ -274,7 +284,6 @@ class Receivings extends Secure_Controller
 		$data['cart'] = $this->receiving_lib->get_cart();
 		$data['total'] = $this->receiving_lib->get_total();
 		$data['mode'] = $this->receiving_lib->get_mode();
-		$data['receipt_title'] = $this->lang->line('receivings_receipt');
 		$data['transaction_time'] = date($this->config->item('dateformat') . ' ' . $this->config->item('timeformat'), strtotime($receiving_info['receiving_time']));
 		$data['show_stock_locations'] = $this->Stock_location->show_locations('receivings');
 		$data['payment_type'] = $receiving_info['payment_type'];

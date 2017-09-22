@@ -4,9 +4,9 @@ require_once("Secure_Controller.php");
 
 class Home extends Secure_Controller 
 {
-	public function __construct()
+	function __construct()
 	{
-		parent::__construct();	
+		parent::__construct(NULL, NULL, 'home');
 	}
 
 	public function index()

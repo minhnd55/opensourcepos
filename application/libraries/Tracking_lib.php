@@ -1,5 +1,11 @@
 <?php if (!defined('BASEPATH')) exit('No direct script access allowed');
 
+/**
+ * Tracking library
+ *
+ * Library with utilities to manage statistics
+ */
+
 class Tracking_lib
 {
 	private $CI;
@@ -43,7 +49,7 @@ class Tracking_lib
 			$this->CI->Appconfig->batch_save(array('client_id' => $clientId));
 		}
 	}
-	
+
 	/*
 	 * Track Event function
 	 */
@@ -66,7 +72,7 @@ class Tracking_lib
 			error_log($e->getMessage());
 		}
 	}
-	
+
 	/*
 	 * Track Page function
 	 */

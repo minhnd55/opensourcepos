@@ -63,7 +63,7 @@ class Items extends Secure_Controller
 		$data_rows = array();
 		foreach($items->result() as $item)
 		{
-			$data_rows[] = $this->xss_clean(get_item_data_row($item, $this));
+			$data_rows[] = $this->xss_clean(get_item_data_row($item));
 			if($item->pic_filename!='')
 			{
 				$this->_update_pic_filename($item);
@@ -169,7 +169,7 @@ class Items extends Secure_Controller
 		$result = array();
 		foreach($item_infos->result() as $item_info)
 		{
-			$result[$item_info->item_id] = $this->xss_clean(get_item_data_row($item_info, $this));
+			$result[$item_info->item_id] = $this->xss_clean(get_item_data_row($item_info));
 		}
 
 		echo json_encode($result);
@@ -180,6 +180,7 @@ class Items extends Secure_Controller
 		$data['item_tax_info'] = $this->xss_clean($this->Item_taxes->get_info($item_id));
 		$data['default_tax_1_rate'] = '';
 		$data['default_tax_2_rate'] = '';
+		$data['item_kits_enabled'] = $this->Employee->has_grant('item_kits', $this->Employee->get_logged_in_employee_info()->person_id);
 
 		$item_info = $this->Item->get_info($item_id);
 		foreach(get_object_vars($item_info) as $property => $value)
@@ -192,10 +193,11 @@ class Items extends Secure_Controller
 			$data['default_tax_1_rate'] = $this->config->item('default_tax_1_rate');
 			$data['default_tax_2_rate'] = $this->config->item('default_tax_2_rate');
 
-			$item_info->receiving_quantity = 0;
-			$item_info->reorder_level = 0;
-			$item_info->item_type = '0'; // standard
-			$item_info->stock_type = '0'; // stock
+			$item_info->receiving_quantity = 1;
+			$item_info->reorder_level = 1;
+			$item_info->item_type = ITEM; // standard
+			$item_info->stock_type = HAS_STOCK;
+			$item_info->tax_category_id = 1;  // Standard
 		}
 
 		$data['item_info'] = $item_info;
@@ -207,6 +209,25 @@ class Items extends Secure_Controller
 		}
 		$data['suppliers'] = $suppliers;
 		$data['selected_supplier'] = $item_info->supplier_id;
+
+		$customer_sales_tax_support = $this->config->item('customer_sales_tax_support');
+		if($customer_sales_tax_support == '1')
+		{
+			$data['customer_sales_tax_enabled'] = TRUE;
+			$tax_categories = array();
+			foreach($this->Tax->get_all_tax_categories()->result_array() as $row)
+			{
+				$tax_categories[$this->xss_clean($row['tax_category_id'])] = $this->xss_clean($row['tax_category']);
+			}
+			$data['tax_categories'] = $tax_categories;
+			$data['selected_tax_category'] = $item_info->tax_category_id;
+		}
+		else
+		{
+			$data['customer_sales_tax_enabled'] = FALSE;
+			$data['tax_categories'] = array();
+			$data['selected_tax_category'] = '';
+		}
 
 		$data['logo_exists'] = $item_info->pic_filename != '';
 		$ext = pathinfo($item_info->pic_filename, PATHINFO_EXTENSION);
@@ -296,7 +317,7 @@ class Items extends Secure_Controller
 		{
 			$item = $this->xss_clean($item);
 			
-			// update the UPC/EAN/ISBN field if empty / NULL with the newly generated barcode
+			// update the barcode field if empty / NULL with the newly generated barcode
 			if(empty($item['item_number']) && $this->config->item('barcode_generate_if_empty'))
 			{
 				// get the newly generated barcode
@@ -305,7 +326,7 @@ class Items extends Secure_Controller
 				
 				$save_item = array('item_number' => $item['item_number']);
 
-				// update the item in the database in order to save the UPC/EAN/ISBN field
+				// update the item in the database in order to save the barcode field
 				$this->Item->save($save_item, $item['item_id']);
 			}
 		}
@@ -370,6 +391,16 @@ class Items extends Secure_Controller
 			'custom9' => $this->input->post('custom9') == NULL ? '' : $this->input->post('custom9'),
 			'custom10' => $this->input->post('custom10') == NULL ? '' : $this->input->post('custom10')
 		);
+
+		$x = $this->input->post('tax_category_id');
+		if(!isset($x))
+		{
+			$item_data['tax_category_id'] = '';
+		}
+		else
+		{
+			$item_data['tax_category_id'] = $this->input->post('tax_category_id');
+		}
 		
 		if(!empty($upload_data['orig_name']))
 		{
@@ -447,7 +478,7 @@ class Items extends Secure_Controller
 				echo json_encode(array('success' => FALSE, 'message' => $message, 'id' => $item_id));
 			}
 		}
-		else//failure
+		else // failure
 		{
 			$message = $this->xss_clean($this->lang->line('items_error_adding_updating') . ' ' . $item_data['name']);
 			
@@ -472,7 +503,7 @@ class Items extends Secure_Controller
 		}
 		else
 		{
-			$exists  = false;
+			$exists = FALSE;
 		}
 		echo !$exists ? 'true' : 'false';
 	}
@@ -670,11 +701,11 @@ class Items extends Secure_Controller
 						  into that directory, so you really can do whatever you want, this probably
 						  needs further discussion  */
 
-						$pic_file = $data[26];
+						$pic_file = $data[24];
 						/*if(strcmp('.htaccess', $pic_file)==0) {
 							$pic_file='';
 						}*/
-						$item_data['pic_filename']=$pic_file;
+						$item_data['pic_filename'] = $pic_file;
 
 						$item_number = $data[0];
 						$invalidated = FALSE;
@@ -719,7 +750,7 @@ class Items extends Secure_Controller
 
 						// array to store information if location got a quantity
 						$allowed_locations = $this->Stock_location->get_allowed_locations();
-						for ($col = 24; $col < $cols; $col = $col + 2)
+						for($col = 25; $col < $cols; $col = $col + 2)
 						{
 							$location_id = $data[$col];
 							if(array_key_exists($location_id, $allowed_locations))
@@ -804,19 +835,20 @@ class Items extends Secure_Controller
 	private function _update_pic_filename($item)
 	{
 		$filename = pathinfo($item->pic_filename, PATHINFO_FILENAME);
-		if($filename=='')
+
+		// if the field is empty there's nothing to check
+		if(!empty($filename))
 		{
-			// if the field is empty there's nothing to check
-			return;
-		}
-		
-		$ext = pathinfo($item->pic_filename, PATHINFO_EXTENSION);
-		if ($ext == '') {
-			$images = glob('./uploads/item_pics/' . $item->pic_filename . '.*');
-			if (sizeof($images) > 0) {
-				$new_pic_filename = pathinfo($images[0], PATHINFO_BASENAME);
-				$item_data = array('pic_filename' => $new_pic_filename);
-				$this->Item->save($item_data, $item->item_id);
+			$ext = pathinfo($item->pic_filename, PATHINFO_EXTENSION);
+			if(empty($ext))
+			{
+				$images = glob('./uploads/item_pics/' . $item->pic_filename . '.*');
+				if(sizeof($images) > 0)
+				{
+					$new_pic_filename = pathinfo($images[0], PATHINFO_BASENAME);
+					$item_data = array('pic_filename' => $new_pic_filename);
+					$this->Item->save($item_data, $item->item_id);
+				}
 			}
 		}
 	}

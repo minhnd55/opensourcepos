@@ -17,6 +17,7 @@
 			if (button_id == 'submit') {
 				$('form', dlog_ref.$modalBody).first().submit();
 			}
+			return false;
 		}
 	};
 
@@ -194,6 +195,7 @@
 	var init = function (_options) {
 		options = _options;
 		enable_actions = enable_actions(options.enableActions);
+		load_success = load_success(options.onLoadSuccess);
 		$('#table').bootstrapTable($.extend(options, {
 			columns: options.headers,
 			url: options.resource + '/search',
@@ -208,7 +210,10 @@
 			exportOptions: {
 				fileName: options.resource.replace(/.*\/(.*?)$/g, '$1')
 			},
-			onPageChange: load_success(options.onLoadSuccess),
+			onPageChange: function(response) {
+				load_success(response);
+				enable_actions();
+			},
 			toolbar: '#toolbar',
 			uniqueId: options.uniqueId || 'id',
 			trimOnSearch: false,
@@ -216,7 +221,10 @@
 			onUncheck: enable_actions,
 			onCheckAll: enable_actions,
 			onUncheckAll: enable_actions,
-			onLoadSuccess: load_success(options.onLoadSuccess),
+			onLoadSuccess: function(response) {
+				load_success(response);
+				enable_actions();
+			},
 			onColumnSwitch : function(field, checked) {
 				var user_settings = localStorage[options.employee_id];
 				user_settings = (user_settings && JSON.parse(user_settings)) || {};
@@ -249,7 +257,6 @@
 	var submit_handler = function(url) {
 		return function (resource, response) {
 			var id = response.id;
-
 			if (!response.success) {
 				$.notify(response.message, { type: 'danger' });
 			} else {
@@ -258,18 +265,14 @@
 				var rows = $(selector.join(",")).length;
 				if (rows > 0 && rows < 15) {
 					var ids = response.id.split(":");
-				    $.get({
-						url: [url || resource + '/get_row', id].join("/"),
-						success: function (response) {
-							$.each(selector, function (index, element) {
-								var id = $(element).data('uniqueid');
-								table().updateByUniqueId({id: id, row: response[id] || response});
-							});
-							dialog_support.init("a.modal-dlg");
-							highlight_row(ids);
-						},
-						dataType: 'json'
-					});
+				    $.get([url || resource + '/get_row', id].join("/"), {}, function (response) {
+						$.each(selector, function (index, element) {
+							var id = $(element).data('uniqueid');
+							table().updateByUniqueId({id: id, row: response[id] || response});
+						});
+						dialog_support.init("a.modal-dlg");
+						highlight_row(ids);
+					}, 'json');
 				} else {
 					// call hightlight function once after refresh
 					options.load_callback = function () {
@@ -280,6 +283,7 @@
 				}
 				$.notify(message, {type: 'success' });
 			}
+			return false;
 		};
 	};
 

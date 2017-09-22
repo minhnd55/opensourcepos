@@ -1,0 +1,34 @@
+<?php 
+
+$lang["employees_basic_information"] = "əməkdaşın bütün məlumatı";
+$lang["employees_cannot_be_deleted"] = "siz seçilmiş əməkdaşlardan silə bilməzsiniz yada siz ozunuzu də seçmisiniz :)";
+$lang["employees_change_password"] = "";
+$lang["employees_confirm_delete"] = "siz əminsiniz ki seçilmiş əməkdaşları silmək istəyirsiniz?";
+$lang["employees_current_password"] = "siz istifadəçini silə bilməzsiniz";
+$lang["employees_current_password_invalid"] = "siz istifadəçini dəyişə bilməzsiniz";
+$lang["employees_employee"] = "";
+$lang["employees_error_adding_updating"] = "əmkdaş üçün giriş haqqında məlumat";
+$lang["employees_error_deleting_demo_admin"] = "yeni əməkdaş";
+$lang["employees_error_updating_demo_admin"] = "siz silmək üçün heç bir əməkdaş seçməmisiniz";
+$lang["employees_login_info"] = "şifrə";
+$lang["employees_new"] = "şifrə ən azı 8 simvoldan olmalıdır";
+$lang["employees_none_selected"] = "şifrələr uyğun gəlmir";
+$lang["employees_one_or_multiple"] = "";
+$lang["employees_password"] = "şifrə mütləqdir";
+$lang["employees_password_minlength"] = "aşağıda bayraqlarla işarələyin giriş üçün";
+$lang["employees_password_must_match"] = "əməkdaş icazəsi və hüquqları";
+$lang["employees_password_not_must_match"] = "şifrəni təkrar edin";
+$lang["employees_password_required"] = "";
+$lang["employees_permission_desc"] = "siz uğurla əməkdaş əlavə etdiniz";
+$lang["employees_permission_info"] = "";
+$lang["employees_repeat_password"] = "siz uğurla sildiniz";
+$lang["employees_subpermission_required"] = "siz uğurla əməkdaş yenilədiniz";
+$lang["employees_successful_adding"] = "";
+$lang["employees_successful_change_password"] = "əməkdaşı yeniləmək";
+$lang["employees_successful_deleted"] = "istifadəçinin adı";
+$lang["employees_successful_updating"] = "istifadəçi adı ən azi 5 simvoldan olmalıdır";
+$lang["employees_unsuccessful_change_password"] = "istifadəçinin adi və mütləq məsafə";
+$lang["employees_update"] = "";
+$lang["employees_username"] = "";
+$lang["employees_username_minlength"] = "";
+$lang["employees_username_required"] = "";

@@ -23,27 +23,22 @@ module.exports = function(grunt) {
 			options: {
 				report: false
 			},
+			targetdistjqueryui: {
+				options: {
+					srcPrefix: 'public/bower_components/jquery-ui',
+					destPrefix: 'public/dist'
+				},
+				files: {
+					'jquery-ui': 'themes/base/jquery-ui.min.css'
+				}
+			},
 			targetdistbootswatch: {
 				options: {
 					srcPrefix: 'public/bower_components/bootswatch',
-					destPrefix: 'public/dist/bootswatch'
+					destPrefix: 'public/dist'
 				},
 				files: {
-					'cerulean/bootstrap.min.css': 'cerulean/bootstrap.min.css',
-					'cosmo/bootstrap.min.css': 'cosmo/bootstrap.min.css',
-					'cyborg/bootstrap.min.css': 'cyborg/bootstrap.min.css',
-					'darkly/bootstrap.min.css': 'darkly/bootstrap.min.css',
-					'flatly/bootstrap.min.css': 'flatly/bootstrap.min.css',
-					'journal/bootstrap.min.css': 'journal/bootstrap.min.css',
-					'paper/bootstrap.min.css': 'paper/bootstrap.min.css',
-					'readable/bootstrap.min.css': 'readable/bootstrap.min.css',
-					'sandstone/bootstrap.min.css': 'sandstone/bootstrap.min.css',
-					'slate/bootstrap.min.css': 'slate/bootstrap.min.css',
-					'spacelab/bootstrap.min.css': 'spacelab/bootstrap.min.css',
-					'superhero/bootstrap.min.css': 'superhero/bootstrap.min.css',
-					'united/bootstrap.min.css': 'united/bootstrap.min.css',
-					'yeti/bootstrap.min.css': 'yeti/bootstrap.min.css',
-					'fonts': 'fonts'
+					bootswatch: '*/'
 				}
 			},
 			targetlicense: {
@@ -53,12 +48,12 @@ module.exports = function(grunt) {
 				files: {
 					'public/license': 'LICENSE'
 				}
-			},
+			}
 		},
 		cssmin: {
 			target: {
 				files: {
-					'public/dist/<%= pkg.name %>.min.css': ['tmp/opensourcepos_bower.css', 'public/css/*.css', '!public/css/login.css', '!public/css/invoice_email.css', '!public/css/barcode_font.css', '!public/css/style.css']
+					'public/dist/<%= pkg.name %>.min.css': ['tmp/opensourcepos_bower.css', 'public/css/*.css', '!public/css/login.css', '!public/css/invoice_email.css', '!public/css/barcode_font.css']
 				}
 			}
 		},
@@ -121,7 +116,8 @@ module.exports = function(grunt) {
 					closeTag: '<!-- end mincss template tags -->',
 					ignorePath: '../../../public/'
 				},
-				src: ['public/dist/*.css', '!public/dist/login.css', '!public/dist/invoice_email.css', '!public/dist/barcode_font.css'],
+				// jquery-ui must be first or at least before opensourcepos.min.css
+				src: ['public/dist/jquery-ui/*.css', 'public/dist/*.css'],
 				dest: 'application/views/partial/header.php',
 			},
 			css_login: {
@@ -131,7 +127,7 @@ module.exports = function(grunt) {
 					closeTag: '<!-- end css template tags -->',
                     ignorePath: '../../public/'
 				},
-				src: ['public/dist/login.css'],
+				src: ['public/css/login.css'],
 				dest: 'application/views/login.php'
 			},
 			js: {
@@ -195,8 +191,8 @@ module.exports = function(grunt) {
 					// Target-specific options go here. 
 					directory: 'public/bower_components',
 					output: 'public/license/bower.LICENSES'
-				},
-			},
+				}
+			}
 		},
 		'bower-licensechecker': {
 			options: {
@@ -217,13 +213,40 @@ module.exports = function(grunt) {
 					noGood: true,
 				}
 			}
+		},
+		apigen: {
+			generate:{
+				options: {
+					apigenPath: 'vendor/bin/',
+					source: 'application',
+					destination: 'docs'
+				}
+			}
+		},
+		compress: {
+			main: {
+				options: {
+					mode: 'zip',
+					archive: 'dist/opensourcepos.zip'
+				},
+				files: [
+					{src: ['public/**', 'vendor/**', 'application/**', '!/public/images/menubar/png/', '!/public/dist/bootswatch/', '/public/dist/bootswatch/*/*.css', 'database/**', '*.txt', '*.md', 'LICENSE', 'docker*', 'Dockerfile', '**/.htaccess', '*.csv']}
+				]
+			}
 		}
-    });
+	});
 
     require('load-grunt-tasks')(grunt);
     grunt.loadNpmTasks('grunt-mocha-webdriver');
-
+	grunt.loadNpmTasks('grunt-composer');
+	grunt.loadNpmTasks('grunt-apigen');
+    grunt.loadNpmTasks('grunt-contrib-compress');
+    
     grunt.registerTask('default', ['wiredep', 'bower_concat', 'bowercopy', 'concat', 'uglify', 'cssmin', 'tags', 'cachebreaker']);
+    grunt.registerTask('update', ['composer:update', 'bower:update']);
     grunt.registerTask('genlicense', ['clean:license', 'license', 'bower-licensechecker']);
+    grunt.registerTask('package', ['default', 'compress']);
+    grunt.registerTask('packages', ['composer:update']);
+    grunt.registerTask('gendocs', ['apigen:generate']);
 
 };

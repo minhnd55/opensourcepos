@@ -7,7 +7,7 @@
 	<link rel="shortcut icon" type="image/x-icon" href="images/favicon.ico">
 	<link rel="stylesheet" type="text/css" href="<?php echo 'dist/bootswatch/' . (empty($this->config->item('theme')) ? 'flatly' : $this->config->item('theme')) . '/bootstrap.min.css' ?>"/>
 
-	<?php if ($this->input->cookie('debug') == "true" || $this->input->get("debug") == "true") : ?>
+	<?php if ($this->input->cookie('debug') == 'true' || $this->input->get('debug') == 'true') : ?>
 		<!-- bower:css -->
 		<link rel="stylesheet" href="bower_components/jquery-ui/themes/base/jquery-ui.css" />
 		<link rel="stylesheet" href="bower_components/bootstrap3-dialog/dist/css/bootstrap-dialog.min.css" />
@@ -18,6 +18,7 @@
 		<link rel="stylesheet" href="bower_components/bootstrap-daterangepicker/daterangepicker.css" />
 		<link rel="stylesheet" href="bower_components/chartist/dist/chartist.min.css" />
 		<link rel="stylesheet" href="bower_components/chartist-plugin-tooltip/dist/chartist-plugin-tooltip.css" />
+		<link rel="stylesheet" href="bower_components/bootstrap-tagsinput/dist/bootstrap-tagsinput.css" />
 		<!-- endbower -->
 		<!-- start css template tags -->
 		<link rel="stylesheet" type="text/css" href="css/bootstrap.autocomplete.css"/>
@@ -28,7 +29,6 @@
 		<link rel="stylesheet" type="text/css" href="css/receipt.css"/>
 		<link rel="stylesheet" type="text/css" href="css/register.css"/>
 		<link rel="stylesheet" type="text/css" href="css/reports.css"/>
-		<link rel="stylesheet" type="text/css" href="css/style.css"/>
 		<!-- end css template tags -->
 		<!-- bower:js -->
 		<script src="bower_components/jquery/dist/jquery.js"></script>
@@ -58,6 +58,7 @@
 		<script src="bower_components/remarkable-bootstrap-notify/bootstrap-notify.js"></script>
 		<script src="bower_components/js-cookie/src/js.cookie.js"></script>
 		<script src="bower_components/blockUI/jquery.blockUI.js"></script>
+		<script src="bower_components/bootstrap-tagsinput/dist/bootstrap-tagsinput.js"></script>
 		<!-- endbower -->
 		<!-- start js template tags -->
 		<script type="text/javascript" src="js/imgpreview.full.jquery.js"></script>
@@ -69,12 +70,11 @@
 		<link rel="stylesheet" media="print" href="dist/print.css" type="text/css" />
 		<![endif]-->
 		<!-- start mincss template tags -->
-		<link rel="stylesheet" type="text/css" href="dist/jquery-ui.css"/>
-		<link rel="stylesheet" type="text/css" href="dist/opensourcepos.min.css?rel=6b4d066e8a"/>
-		<link rel="stylesheet" type="text/css" href="dist/style.css"/>
+		<link rel="stylesheet" type="text/css" href="dist/jquery-ui/jquery-ui.min.css"/>
+		<link rel="stylesheet" type="text/css" href="dist/opensourcepos.min.css?rel=7f52cbc5d2"/>
 		<!-- end mincss template tags -->
 		<!-- start minjs template tags -->
-		<script type="text/javascript" src="dist/opensourcepos.min.js?rel=3af1006480"></script>
+		<script type="text/javascript" src="dist/opensourcepos.min.js?rel=36383c1139"></script>
 		<!-- end minjs template tags -->
 	<?php endif; ?>
 
@@ -97,8 +97,9 @@
 				</div>
 
 				<div class="navbar-right" style="margin:0">
-					<?php echo $user_info->first_name . ' ' . $user_info->last_name . '  |  ' . ($this->input->get("debug") == "true" ? $this->session->userdata('session_sha1') : ''); ?>
-					<?php echo anchor("home/logout", $this->lang->line("common_logout")); ?>
+					<?php echo anchor('employees/change_password/'.$user_info->person_id, $user_info->first_name . ' ' . $user_info->last_name, array('class' => 'modal-dlg', 'data-btn-submit' => 'Submit', 'title' => $this->lang->line('employees_change_password'))); ?>
+					<?php echo '  |  ' . ($this->input->get('debug') == 'true' ? $this->session->userdata('session_sha1') . '  |  ' : ''); ?>
+					<?php echo anchor('home/logout', $this->lang->line('common_logout')); ?>
 				</div>
 
 				<div class="navbar-center" style="text-align:center">
@@ -122,13 +123,13 @@
 
 				<div class="navbar-collapse collapse">
 					<ul class="nav navbar-nav navbar-right">
-						<?php foreach($allowed_modules->result() as $module): ?>
-						<li class="<?php echo $module->module_id == $this->uri->segment(1)? 'active': ''; ?>">
-							<a href="<?php echo site_url("$module->module_id");?>" title="<?php echo $this->lang->line("module_".$module->module_id);?>" class="menu-icon">
-								<img src="<?php echo base_url().'images/menubar/'.$module->module_id.'.png';?>" border="0" alt="Module Icon" /><br />
-								<?php echo $this->lang->line("module_".$module->module_id) ?>
-							</a>
-						</li>
+						<?php foreach($allowed_modules as $module): ?>
+							<li class="<?php echo $module->module_id == $this->uri->segment(1) ? 'active' : ''; ?>">
+								<a href="<?php echo site_url("$module->module_id"); ?>" title="<?php echo $this->lang->line("module_" . $module->module_id); ?>" class="menu-icon">
+									<img src="<?php echo base_url() . 'images/menubar/' . $module->module_id . '.png'; ?>" border="0" alt="Module Icon"/><br/>
+									<?php echo $this->lang->line("module_" . $module->module_id) ?>
+								</a>
+							</li>
 						<?php endforeach; ?>
 					</ul>
 				</div>

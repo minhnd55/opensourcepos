@@ -58,10 +58,8 @@ class Item_kits extends Secure_Controller
 		{
 			// calculate the total cost and retail price of the Kit so it can be printed out in the manage table
 			$item_kit = $this->_add_totals_to_item_kit($item_kit);
-			$data_rows[] = get_item_kit_data_row($item_kit, $this);
+			$data_rows[] = $this->xss_clean(get_item_kit_data_row($item_kit));
 		}
-
-		$data_rows = $this->xss_clean($data_rows);
 
 		echo json_encode(array('total' => $total_rows, 'rows' => $data_rows));
 	}
@@ -78,7 +76,7 @@ class Item_kits extends Secure_Controller
 		// calculate the total cost and retail price of the Kit so it can be added to the table refresh
 		$item_kit = $this->_add_totals_to_item_kit($this->Item_kit->get_info($row_id));
 		
-		echo json_encode(get_item_kit_data_row($item_kit, $this));
+		echo json_encode(get_item_kit_data_row($item_kit));
 	}
 	
 	public function view($item_kit_id = -1)
@@ -88,7 +86,7 @@ class Item_kits extends Secure_Controller
 		if($item_kit_id == -1)
 		{
 			$info->price_option = '0';
-			$info->print_option = '0';
+			$info->print_option = PRINT_ALL;
 			$info->kit_item_id = 0;
 		}
 		foreach(get_object_vars($info) as $property => $value)
